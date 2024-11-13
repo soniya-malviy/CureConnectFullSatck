@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { v2 as cloudinary } from 'cloudinary';
 import {doctorModel} from "../models/doctormodel.js";
 import jwt from 'jsonwebtoken';
+import userModel from "../models/usermodel.js";
 const addDoctor = async (req, res) => {
     try {
         const { name, email, password, speciality, degrees, experience, about, fees, address } = req.body;
@@ -90,6 +91,12 @@ const allDoctors = async (req, res)=>{
         res.json({success:false, message:error.message})
     }
 }
+
+// api to delete user
+
+
+
+
 
 
 export { addDoctor,allDoctors, loginAdmin };

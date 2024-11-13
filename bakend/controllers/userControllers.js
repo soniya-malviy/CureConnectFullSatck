@@ -43,7 +43,7 @@ const registerUser = async (req, res) => {
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
         console.log("Token generated:", token); // Check if token is generated
 
-        res.json({ success: true, token });
+        res.json({ success: true, message: "User created Successfully" });
     } catch (err) {
         console.log("Error:", err);
         res.status(500).json({ success: false, message: err.message });
@@ -78,6 +78,7 @@ const loginUser=async (req, res)=>{
 // api to get user profile data
 
 const getProfile = async (req, res)=>{
+    console.log(req.body);
     try{
         const {userId} = req.body
         const userData = await userModel.findById(userId).select('-password')
@@ -234,6 +235,23 @@ const cancelAppointments = async (req, res)=>{
 // const paymentRazorpay = async (req, res)=>{
 //     const
 // }
+const deleteUser = async (req, res) => {
+    try {
+        const userId = req.body.userId;
+
+        // Find and delete the user by their ID
+        const deletedUser = await userModel.findByIdAndDelete(userId);
+
+        if (!deletedUser) {
+            return res.json({ success: false, message: "User not found" });
+        }
+
+        res.json({ success: true, message: "User account has been deleted successfully" });
+    } catch (err) {
+        console.log(err);
+        res.json({ success: false, message: err.message });
+    }
+};
 
 
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment,cancelAppointments };
+export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment,cancelAppointments,deleteUser };
