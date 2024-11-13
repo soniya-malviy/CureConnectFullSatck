@@ -1,5 +1,5 @@
 import React from 'react';
-import Header from '../components/Header';
+import Header from '../Components/Header';
 import SpecialityMenu from "../Components/SpecialityMenu.jsx";
 import TopDoctors from "../Components/TopDoctors.jsx";
 import Banner from "../Components/Banner.jsx";
