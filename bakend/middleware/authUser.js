@@ -2,16 +2,13 @@ import jwt from 'jsonwebtoken';
 
 // admin authentication middleware
 
-const authUser = (req, res, next) => {
-
+const authAdmin = (req, res, next) => {
     try{
         const {token} = req.headers;
-        console.log(token)
         if(!token){
             return res.json({success: false, message:"Not Authorized login again"});
         }
         const token_decode = jwt.verify(token, process.env.JWT_SECRET);
-
         req.body.userId = token_decode.id
         next()
     }
@@ -21,4 +18,4 @@ const authUser = (req, res, next) => {
     }
 }
 
-export default authUser;
+export default authAdmin;

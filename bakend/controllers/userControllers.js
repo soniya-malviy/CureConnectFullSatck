@@ -41,9 +41,11 @@ const registerUser = async (req, res) => {
 
         // Generate token
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+        console.log(token);
         console.log("Token generated:", token); // Check if token is generated
 
-        res.json({ success: true, message: "User created Successfully" });
+        res.json({ success: true,message:"Account created Successfully", token });
+
     } catch (err) {
         console.log("Error:", err);
         res.status(500).json({ success: false, message: err.message });

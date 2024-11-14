@@ -18,8 +18,8 @@ const AppContextProvider = (props) => {
     const getDoctorsData = async()=>{
         try{
             console.log("come inside")
-            const {data} =await  axios.get(backendUrl+'/api/doctor/list')
-            console.log(data)
+            const {data} =await  axios.get(backendUrl+'/api/doctor/list', {headers: {token}})
+
             if(data.success){
                 setDoctors(data.doctors)
             }else{
@@ -46,11 +46,7 @@ const AppContextProvider = (props) => {
             console.log(error)
         }
     }
-    const value={
-        doctors,getDoctorsData,
-        currencySymbol,
-        token, setToken, backendUrl,userData,setUserData,loadUserProfileData
-    }
+
     useEffect(() => {
         getDoctorsData()
     }, []);
@@ -62,8 +58,15 @@ const AppContextProvider = (props) => {
             setUserData(false)
         }
     }, [token]);
+
+    const value={
+        doctors,getDoctorsData,
+        currencySymbol,
+        token, setToken, backendUrl,userData,setUserData,loadUserProfileData
+    }
     return (
         <AppContext.Provider value={value}>
+            {/* eslint-disable-next-line react/prop-types */}
                 {props.children}
         </AppContext.Provider>
     )
