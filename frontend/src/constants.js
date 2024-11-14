@@ -1,6 +1,6 @@
-let ENDPOINT = import.meta.env.VITE_BACKEND_URL
+let ENDPOINT = "http://localhost:4000"
 if(process.env.NODE_ENV==="production"){
-    ENDPOINT= import.meta.env.RENDER_BACKEND_URL
+    ENDPOINT= "https://cureconnectfullsatck.onrender.com"
 }
 
 export default ENDPOINT;
