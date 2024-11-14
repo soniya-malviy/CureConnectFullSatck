@@ -20,6 +20,7 @@ const Login=()=>{
                 if(data.success){
                     localStorage.setItem('token', data.token)
                     setToken(data.token)
+                    toast.success(data.message)
                 }else{
                     toast.error(data.message)
                 }
