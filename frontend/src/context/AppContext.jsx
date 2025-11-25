@@ -1,74 +1,110 @@
-import {createContext, useEffect, useState} from "react";
-// import {doctors} from "../assets/assets.js";
-import axios from 'axios'
-import {toast} from "react-toastify";
-
+import { createContext, useEffect, useState } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
 import ENDPOINT from "../constants.js";
 
 export const AppContext = createContext();
+
 const AppContextProvider = (props) => {
-    const currencySymbol='$'
-    const backendUrl =ENDPOINT;
-    const [doctors, setDoctors]= useState([])
-    const [token, setToken] = useState(localStorage.getItem('token')?localStorage.getItem('token'):false)
-    const [userData, setUserData]= useState(false)
+    const currencySymbol = '$';
+    const backendUrl = ENDPOINT;
 
-    console.log("run till here")
+    const [doctors, setDoctors] = useState([]);
+    const [token, setToken] = useState(localStorage.getItem("token") || false);
+    const [userData, setUserData] = useState(false);
 
-    const getDoctorsData = async()=>{
-        try{
-            console.log("come inside")
-            const {data} =await  axios.get(backendUrl+'/api/doctor/list', {headers: {token}})
+    // 🔥 GLOBAL LOADING STATE
+    const [loading, setLoading] = useState(false);
 
-            if(data.success){
-                setDoctors(data.doctors)
-            }else{
-                toast.error(data.message)
+    console.log("run till here");
+
+    // -------------------------
+    // ⭐ FETCH DOCTORS
+    // -------------------------
+    const getDoctorsData = async () => {
+        try {
+            setLoading(true);   // 🔥 START LOADING
+
+            console.log("come inside");
+            const { data } = await axios.get(backendUrl + "/api/doctor/list", {
+                headers: { token },
+            });
+
+            if (data.success) {
+                setDoctors(data.doctors);
+            } else {
+                toast.error(data.message);
             }
-        }catch (error){
-            toast.error(error.message)
-            console.log(error)
+        } catch (error) {
+            toast.error(error.message);
+            console.log(error);
+        } finally {
+            setLoading(false);  // 🔥 STOP LOADING
         }
-    }
+    };
 
-    const loadUserProfileData=async ()=>{
-        try{
-            const {data} = await axios.get(backendUrl + '/api/user/get-profile', {headers: {token}})
-            if(data.success){
-                setUserData(data.userData)
-            }else{
-                toast.error(data.message)
+    // -------------------------
+    // ⭐ LOAD USER PROFILE
+    // -------------------------
+    const loadUserProfileData = async () => {
+        try {
+            setLoading(true);   // 🔥 START LOADING
+
+            const { data } = await axios.get(backendUrl + "/api/user/get-profile", {
+                headers: { token },
+            });
+
+            if (data.success) {
+                setUserData(data.userData);
+            } else {
+                toast.error(data.message);
             }
-
-
-        }catch (error){
-            toast.error(error.message)
-            console.log(error)
+        } catch (error) {
+            toast.error(error.message);
+            console.log(error);
+        } finally {
+            setLoading(false);  // 🔥 STOP LOADING
         }
-    }
+    };
 
+    // AUTO RUN DOCTORS FETCH
     useEffect(() => {
-        getDoctorsData()
+        getDoctorsData();
     }, []);
 
+    // AUTO RUN PROFILE FETCH WHEN TOKEN CHANGES
     useEffect(() => {
-        if(token){
-            loadUserProfileData()
-        }else{
-            setUserData(false)
+        if (token) {
+            loadUserProfileData();
+        } else {
+            setUserData(false);
         }
     }, [token]);
 
-    const value={
-        doctors,getDoctorsData,
+    // -------------------------
+    // CONTEXT VALUE
+    // -------------------------
+    const value = {
+        doctors,
+        getDoctorsData,
         currencySymbol,
-        token, setToken, backendUrl,userData,setUserData,loadUserProfileData
-    }
+        token,
+        setToken,
+        backendUrl,
+        userData,
+        setUserData,
+        loadUserProfileData,
+
+        // 🔥 ADD THESE
+        loading,
+        setLoading,
+    };
+
     return (
         <AppContext.Provider value={value}>
-            {/* eslint-disable-next-line react/prop-types */}
-                {props.children}
+            {props.children}
         </AppContext.Provider>
-    )
-}
+    );
+};
+
 export default AppContextProvider;

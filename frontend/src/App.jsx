@@ -12,10 +12,15 @@ import Navbar from "./Components/Navbar.jsx";
 import Footer from "./Components/Footer.jsx";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useContext } from "react";
+import { AppContext } from "./context/AppContext";
+import Loader from "./Components/Loader.jsx";
 
 function App() {
+    const { loading } = useContext(AppContext);
     return (
         <div className="mx-4 sm:mx-[10%]">
+            {false && <Loader />}
             <Navbar />
 
             {/* ToastContainer added here */}
