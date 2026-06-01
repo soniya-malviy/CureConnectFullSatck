@@ -4,6 +4,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import {doctorModel} from "../models/doctormodel.js";
 import jwt from 'jsonwebtoken';
 import userModel from "../models/usermodel.js";
+import appointmentModel from "../models/appointmentModel.js";
 const addDoctor = async (req, res) => {
     try {
         const { name, email, password, speciality, degrees, experience, about, fees, address } = req.body;
@@ -11,17 +12,15 @@ const addDoctor = async (req, res) => {
 
         // Check for missing required fields
         if (!name || !email || !password || !speciality || !degrees || !experience || !about || !fees || !address) {
-            return res.json({ success: false, message: "Missing details" });
+            return res.status(400).json({ success: false, message: "Missing details" });
         }
 
-        // Validate email
         if (!validator.isEmail(email)) {
-            return res.json({ success: false, message: "Please enter a valid email" });
+            return res.status(400).json({ success: false, message: "Please enter a valid email" });
         }
 
-        // Validate password length
         if (password.length < 8) {
-            return res.json({ success: false, message: "Please enter a strong password" });
+            return res.status(400).json({ success: false, message: "Please enter a strong password" });
         }
 
         // Hash password
@@ -46,11 +45,18 @@ const addDoctor = async (req, res) => {
             experience,
             about,
             fees,
-            address: JSON.parse(req.body.address),
+
             date: Date.now(),
         };
 
-        // Save to database
+        let parsedAddress;
+        try {
+            parsedAddress = JSON.parse(req.body.address);
+        } catch (jsonError) {
+            return res.status(400).json({ success: false, message: "Invalid address format" });
+        }
+        doctorData.address = parsedAddress;
+
         const newDoctor = new doctorModel(doctorData);
         await newDoctor.save();
 
@@ -70,33 +76,95 @@ const loginAdmin = async (req, res) => {
             const token = jwt.sign(email+password, process.env.JWT_SECRET)
             res.json({success: true, token});
         }else{
-            res.json({success:false, message: "Invalid credentials"});
+            res.status(401).json({success:false, message: "Invalid credentials"});
         }
-
 
     }catch (err){
         console.log(err)
-        res.json({ success: false, message: err.message });
+        res.status(500).json({ success: false, message: err.message });
     }
 }
 
-// api to get all doctors data for admin panel
-
-const allDoctors = async (req, res)=>{
+const allDoctors = async (req, res) => {
     try{
         const doctors = await doctorModel.find({}).select('-password')
         res.json({success:true, doctors})
     }catch (error){
         console.log(error)
-        res.json({success:false, message:error.message})
+        res.status(500).json({success:false, message:error.message})
     }
 }
 
-// api to delete user
+const appointmentsAdmin = async (req, res) => {
+    try{
+        const appointments = await appointmentModel.find({})
+        res.json({success:true, appointments})
+    }catch (error){
+        console.log(error)
+        res.status(500).json({success:false, message:error.message})
+    }
+}
 
+const appointmentCancel = async (req, res) => {
+    try{
+        const {appointmentId} = req.body
+        const appointmentData = await appointmentModel.findById(appointmentId)
+        if(!appointmentData){
+            return res.status(404).json({success:false, message:"Appointment not found"})
+        }
+        await appointmentModel.findByIdAndUpdate(appointmentId, {cancelled:true})
 
+        const {docId, slotDate, slotTime} = appointmentData
+        const doctorData = await doctorModel.findById(docId)
+        if(doctorData && doctorData.slots_booked && doctorData.slots_booked[slotDate]){
+            let slots_booked = doctorData.slots_booked
+            slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
+            await doctorModel.findByIdAndUpdate(docId, {slots_booked})
+        }
 
+        res.json({success:true, message:"Appointment Cancelled"})
+    }catch (error){
+        console.log(error)
+        res.status(500).json({success:false, message:error.message})
+    }
+}
 
+const appointmentComplete = async (req, res) => {
+    try{
+        const {appointmentId} = req.body
+        const appointmentData = await appointmentModel.findById(appointmentId)
+        if(!appointmentData){
+            return res.status(404).json({success:false, message:"Appointment not found"})
+        }
+        if(appointmentData.cancelled){
+            return res.status(400).json({success:false, message:"Cannot complete a cancelled appointment"})
+        }
+        await appointmentModel.findByIdAndUpdate(appointmentId, {isCompleted:true})
+        res.json({success:true, message:"Appointment Completed"})
+    }catch (error){
+        console.log(error)
+        res.status(500).json({success:false, message:error.message})
+    }
+}
 
+const adminDashboard = async (req, res) => {
+    try{
+        const doctors = await doctorModel.find({})
+        const users = await userModel.find({})
+        const appointments = await appointmentModel.find({})
 
-export { addDoctor,allDoctors, loginAdmin };
+        const dashData = {
+            doctorsCount: doctors.length,
+            patientsCount: users.length,
+            appointmentsCount: appointments.length,
+            latestAppointments: appointments.reverse().slice(0, 5)
+        }
+
+        res.json({success:true, dashData})
+    }catch (error){
+        console.log(error)
+        res.status(500).json({success:false, message:error.message})
+    }
+}
+
+export { addDoctor, allDoctors, loginAdmin, appointmentsAdmin, appointmentCancel, appointmentComplete, adminDashboard };

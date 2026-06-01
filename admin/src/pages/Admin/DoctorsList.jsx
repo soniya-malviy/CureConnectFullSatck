@@ -1,20 +1,26 @@
-import React, {useState, useEffect, useContext} from "react";
+import React, {useEffect, useContext} from "react";
 import {AdminContext} from "../../context/AdminContext.jsx";
+
 const DoctorsList = () => {
 
-    const {doctors, aToken, getAllDoctors, changeAvailability} = useContext(AdminContext)
+    const {doctors, aToken, getAllDoctors, changeAvailability, loading} = useContext(AdminContext)
 
     useEffect(() => {
         if(aToken){
             getAllDoctors()
         }
     }, [aToken]);
+
     return (
         <div className="m-5 max-h-[90vh] overflow-y-scroll">
-            <h1 className="text-lg font-mediuml">All Doctors</h1>
-            <div className="w-full flex flex-wrap gap-4 pt-5 gap-y-6">
-                {
-                    doctors.map((item, index)=>(
+            <h1 className="text-lg font-medium">All Doctors</h1>
+            {loading ? (
+                <div className="flex items-center justify-center h-64">
+                    <div className="w-10 h-10 border-4 border-blue-900 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            ) : doctors.length > 0 ? (
+                <div className="w-full flex flex-wrap gap-4 pt-5 gap-y-6">
+                    {doctors.map((item, index)=>(
                         <div className="border border-indigo-200 rounded-xl max-w-56 overflow-hidden cursor-pointer group" key={index}>
                             <img className="bg-indigo-50 group-hover:bg-blue-900 transition-all duration-500" src={item.image} alt=""/>
                             <div className="p-4">
@@ -30,11 +36,13 @@ const DoctorsList = () => {
                                 </div>
                             </div>
                         </div>
-
-                    ))
-                }
-            </div>
-
+                    ))}
+                </div>
+            ) : (
+                <div className="flex items-center justify-center h-64 text-gray-400">
+                    <p>No doctors found</p>
+                </div>
+            )}
         </div>
     )
 }
