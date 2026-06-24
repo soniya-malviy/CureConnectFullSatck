@@ -1,6 +1,9 @@
 Here's a `README.md` template with the API documentation and frontend setup in markdown format:
 
-```markdown
+Demo Video
+
+https://www.loom.com/share/34356b6d61724b029d653b01eee51f10
+
 # Doctor Appointment Booking System
 
 This repository contains the backend and frontend for a Doctor Appointment Booking System. It includes API endpoints for user registration, login, profile management, and more. The frontend is built using React.js, and the backend is built using Express.js and MongoDB.
@@ -24,6 +27,7 @@ This repository contains the backend and frontend for a Doctor Appointment Booki
 ### 1. Register User
 - **Endpoint**: `POST /api/admin/register`
 - **Request Body**:
+```
   ```json
   {
     "name": "JohnDoe",
